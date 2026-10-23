@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="BitStudio — A crisp, precision pixel art editor and sprite creator built with HTML, CSS, and vanilla JavaScript.">
+  <meta name="theme-color" content="#121316">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23121316'/><rect x='2' y='2' width='4' height='4' fill='%23f05d38'/><rect x='6' y='6' width='4' height='4' fill='%23ffffff'/><rect x='10' y='10' width='4' height='4' fill='%23f05d38'/></svg>">
+  <title>BitStudio — Pixel Art Editor</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Main Application Shell -->
+  <div class="app-shell" id="appShell">
+    
+    <!-- Top Header Navigation -->
+    <header class="app-header" role="banner">
+      <div class="header-left">
+        <div class="brand">
+          <svg class="brand-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <rect x="2" y="2" width="6" height="6" fill="#f05d38" />
+            <rect x="9" y="2" width="6" height="6" fill="#ffffff" />
+            <rect x="16" y="2" width="6" height="6" fill="#f05d38" />
+            <rect x="2" y="9" width="6" height="6" fill="#ffffff" />
+            <rect x="9" y="9" width="6" height="6" fill="#f05d38" />
+            <rect x="16" y="9" width="6" height="6" fill="#ffffff" />
+            <rect x="2" y="16" width="6" height="6" fill="#f05d38" />
+            <rect x="9" y="16" width="6" height="6" fill="#ffffff" />
+            <rect x="16" y="16" width="6" height="6" fill="#f05d38" />
+          </svg>
+          <span class="brand-title">BitStudio</span>
+          <span class="brand-badge" id="headerGridBadge">32×32</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="header-center" role="toolbar" aria-label="History and View Controls">
+        <button type="button" class="btn-icon" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <button type="button" class="btn-icon" id="btnRedo" title="Redo (Ctrl+Y / Ctrl+Shift+Z)" aria-label="Redo" disabled>
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.293 3.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 9H9a5 5 0 00-5 5v2a1 1 0 11-2 0v-2a7 7 0 017-7h5.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+
+        <div class="header-divider desktop-only" aria-hidden="true"></div>
+
+        <button type="button" class="btn-icon active desktop-only" id="btnToggleGrid" title="Toggle Grid Lines (H)" aria-label="Toggle Grid Lines" aria-pressed="true">
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+        </button>
+
+        <div class="zoom-group desktop-only">
+          <button type="button" class="btn-icon" id="btnZoomOut" title="Zoom Out (-)" aria-label="Zoom Out">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+          <span class="zoom-label" id="zoomPercentage" title="Current Zoom">100%</span>
+          <button type="button" class="btn-icon" id="btnZoomIn" title="Zoom In (+)" aria-label="Zoom In">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+          <button type="button" class="btn-text" id="btnZoomReset" title="Reset Zoom to 100% (0)">Reset</button>
+        </div>
+
+        <div class="header-divider desktop-only" aria-hidden="true"></div>
+
+        <button type="button" class="btn-icon desktop-only" id="btnClearCanvas" title="Clear Canvas (C)" aria-label="Clear Canvas">
+          <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Document Controls & Mobile/Tablet Toggles -->
+      <div class="header-right">
+        <!-- Tablet/Mobile Drawer Toggles -->
+        <button type="button" class="btn-subtle mobile-tablet-only" id="btnTogglePalette" title="Color Palette" aria-label="Open Color Palette">
+          <span class="header-color-indicator" id="headerColorIndicator" style="background-color: #f05d38;"></span>
+          <span class="btn-text-label">Color</span>
+        </button>
+
+        <button type="button" class="btn-subtle mobile-tablet-only" id="btnToggleSettings" title="Canvas & Tool Settings" aria-label="Open Settings">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+          </svg>
+          <span class="btn-text-label">Settings</span>
+        </button>
+
+        <!-- Desktop Action Buttons -->
+        <button type="button" class="btn-subtle desktop-only" id="btnShortcuts" title="Keyboard Shortcuts (?)" aria-label="View Keyboard Shortcuts">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+          </svg>
+          <span class="btn-text-label">Shortcuts</span>
+        </button>
+
+        <label class="btn-subtle file-upload-label desktop-only" title="Import Image as Pixel Art">
+          <input type="file" id="imageInput" accept="image/*" class="visually-hidden">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="btn-text-label">Import</span>
+        </label>
+
+        <!-- Primary Export Action (Always visible and prominent) -->
+        <button type="button" class="btn-primary" id="btnExport" title="Export as PNG">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+          <span>Export PNG</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="workspace-layout">
+      
+      <!-- Left Sidebar: Drawing Tools & Modifiers (Desktop & Tablet) -->
+      <aside class="sidebar-tools" role="toolbar" aria-label="Drawing Tools">
+        
+        <div class="tool-section">
+          <span class="section-label">Tools</span>
+          <div class="tool-buttons" role="radiogroup" aria-label="Drawing Tools">
+            <button type="button" class="tool-btn active" data-tool="pen" id="toolPen" title="Pencil / Pen (B)" role="radio" aria-checked="true">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              <span class="tool-shortcut">B</span>
+            </button>
+
+            <button type="button" class="tool-btn" data-tool="eraser" id="toolEraser" title="Eraser (E)" role="radio" aria-checked="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+              <span class="tool-shortcut">E</span>
+            </button>
+
+            <button type="button" class="tool-btn" data-tool="bucket" id="toolBucket" title="Paint Bucket (G)" role="radio" aria-checked="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.732V5a2 2 0 012-2h4a2 2 0 012 2v7.268A4 4 0 0116 19a4 4 0 01-6-4.732z" clip-rule="evenodd"/>
+              </svg>
+              <span class="tool-shortcut">G</span>
+            </button>
+
+            <button type="button" class="tool-btn" data-tool="dropper" id="toolDropper" title="Eyedropper (I)" role="radio" aria-checked="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                <path fill-rule="evenodd" d="M7 2a1 1 0 00-.707.293l-4 4a1 1 0 000 1.414l1.293 1.293L2.293 10.293a1 1 0 000 1.414l7 7a1 1 0 001.414 0l1.293-1.293 1.293 1.293a1 1 0 001.414 0l4-4a1 1 0 000-1.414l-4-4a1 1 0 00-.707-.293H13V3a1 1 0 00-1-1H7zm5.414 9l-4.707-4.707 1.293-1.293 4.707 4.707-1.293 1.293z" clip-rule="evenodd"/>
+              </svg>
+              <span class="tool-shortcut">I</span>
+            </button>
+
+            <button type="button" class="tool-btn" data-tool="line" id="toolLine" title="Line Tool (L)" role="radio" aria-checked="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 010-1.414l12-12a1 1 0 111.414 1.414l-12 12A1 1 0 013 17z" clip-rule="evenodd"/>
+              </svg>
+              <span class="tool-shortcut">L</span>
+            </button>
+
+            <button type="button" class="tool-btn" data-tool="rect" id="toolRect" title="Rectangle Tool (R)" role="radio" aria-checked="false">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v10h10V5H5z" clip-rule="evenodd"/>
+              </svg>
+              <span class="tool-shortcut">R</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <span class="section-label">Stroke Size</span>
+          <div class="brush-size-group" role="radiogroup" aria-label="Stroke Size">
+            <button type="button" class="size-btn active" data-size="1" title="1 Pixel" role="radio" aria-checked="true">1</button>
+            <button type="button" class="size-btn" data-size="2" title="2 Pixels" role="radio" aria-checked="false">2</button>
+            <button type="button" class="size-btn" data-size="3" title="3 Pixels" role="radio" aria-checked="false">3</button>
+          </div>
+        </div>
+
+        <div class="tool-section">
+          <span class="section-label">Symmetry</span>
+          <div class="symmetry-group">
+            <button type="button" class="btn-toggle" id="btnMirrorX" title="Horizontal Mirror Symmetry (X)" aria-pressed="false">
+              <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+                <path d="M10 2a1 1 0 011 1v14a1 1 0 11-2 0V3a1 1 0 011-1zM4 6a1 1 0 011 1v6a1 1 0 11-2 0V7a1 1 0 011-1zM16 6a1 1 0 011 1v6a1 1 0 11-2 0V7a1 1 0 011-1z"/>
+              </svg>
+              <span>Mirror X</span>
+            </button>
+            <button type="button" class="btn-toggle" id="btnMirrorY" title="Vertical Mirror Symmetry (Y)" aria-pressed="false">
+              <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+                <path d="M2 10a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM6 4a1 1 0 011 1h6a1 1 0 110 2H7a1 1 0 01-1-1zM6 14a1 1 0 011 1h6a1 1 0 110 2H7a1 1 0 01-1-1z"/>
+              </svg>
+              <span>Mirror Y</span>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Center Viewport: Interactive Canvas Area -->
+      <main class="canvas-viewport" id="canvasViewport" role="region" aria-label="Pixel Art Drawing Canvas">
+        
+        <div class="canvas-transform-wrapper" id="canvasTransformWrapper">
+          <div class="canvas-stage" id="canvasStage">
+            <!-- Checkerboard background pattern layer -->
+            <div class="canvas-checkerboard" id="canvasCheckerboard"></div>
+
+            <!-- Active Art Canvas (Actual Pixel Art Data) -->
+            <canvas id="artCanvas" width="32" height="32" class="art-canvas"></canvas>
+
+            <!-- Overlay Canvas (Crisp Grid Lines, Hover Cursor & Symmetry Guidelines) -->
+            <canvas id="overlayCanvas" width="512" height="512" class="overlay-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Floating Status Bar at bottom of canvas (Desktop & Tablet) -->
+        <footer class="canvas-status-bar" role="status" aria-live="polite">
+          <div class="status-item">
+            <span class="status-title">COORDS:</span>
+            <span class="status-val font-mono" id="statusCoords">-- , --</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-title">CANVAS:</span>
+            <span class="status-val font-mono" id="statusCanvasSize">32 × 32</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-title">TOOL:</span>
+            <span class="status-val" id="statusToolName">Pen (1px)</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-title">SAVED:</span>
+            <span class="status-val status-saved" id="statusSavedIndicator">Auto-saved</span>
+          </div>
+        </footer>
+      </main>
+
+      <!-- Drawer Backdrop for Tablet & Mobile -->
+      <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+      <!-- Right Sidebar on Desktop / Slide-up Drawer on Tablet & Mobile -->
+      <aside class="sidebar-palette" id="sidebarPalette" role="region" aria-label="Color Palette and Canvas Settings">
+        
+        <!-- Mobile/Tablet Drawer Header with Tabs -->
+        <div class="drawer-header mobile-tablet-only">
+          <div class="drawer-tabs" role="tablist">
+            <button type="button" class="drawer-tab active" id="tabPalette" role="tab" aria-selected="true" aria-controls="drawerSectionPalette">Palette</button>
+            <button type="button" class="drawer-tab" id="tabSettings" role="tab" aria-selected="false" aria-controls="drawerSectionSettings">Settings</button>
+          </div>
+          <button type="button" class="drawer-close-btn" id="btnDrawerClose" aria-label="Close drawer">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Section: Palette & Color Inspector -->
+        <div class="drawer-section active" id="drawerSectionPalette">
+          <!-- Active Color Selection Block -->
+          <div class="palette-card">
+            <div class="card-header">
+              <span class="card-title">Color Inspector</span>
+            </div>
+
+            <div class="color-picker-row">
+              <!-- Primary and Secondary Swatch Boxes -->
+              <div class="dual-swatch-box">
+                <div class="swatch-wrapper primary-swatch-wrapper" title="Primary Drawing Color">
+                  <div class="swatch-color" id="primaryColorPreview" style="background-color: #f05d38;"></div>
+                  <input type="color" id="nativeColorPicker" value="#f05d38" class="native-color-input" title="Choose Custom Color">
+                </div>
+                <button type="button" class="btn-swap-colors" id="btnSwapColors" title="Swap Colors (X)" aria-label="Swap Primary and Secondary Colors">
+                  <svg viewBox="0 0 20 20" width="12" height="12" fill="currentColor">
+                    <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 00.832 1.618l4.472 3.354A1 1 0 0010 15.414V13H15a1 1 0 000-2H9a1 1 0 00-1 1v1.586l-3-2.25V4z"/>
+                  </svg>
+                </button>
+                <div class="swatch-wrapper secondary-swatch-wrapper" title="Secondary / Background Color">
+                  <div class="swatch-color" id="secondaryColorPreview" style="background-color: #121316;"></div>
+                </div>
+              </div>
+
+              <!-- Hex & Value Input -->
+              <div class="hex-input-group">
+                <label for="hexInput" class="visually-hidden">Color Hex Code</label>
+                <span class="hex-hash">#</span>
+                <input type="text" id="hexInput" value="F05D38" maxlength="6" class="hex-input font-mono" spellcheck="false">
+                <button type="button" class="btn-add-swatch" id="btnAddSwatch" title="Save current color to custom palette" aria-label="Save current color">
+                  <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Palette Presets Selector & Swatches -->
+          <div class="palette-card">
+            <div class="card-header">
+              <span class="card-title">Palette</span>
+              <select id="paletteSelect" class="palette-select" aria-label="Select Color Palette">
+                <option value="sweet16">Sweet 16 (Classic)</option>
+                <option value="pico8">Pico-8 (Retro)</option>
+                <option value="gameboy">Game Boy (4-Shade)</option>
+                <option value="cyber">Cyberpunk Neon</option>
+                <option value="earth">Earth & Skin</option>
+                <option value="monochrome">Monochrome</option>
+              </select>
+            </div>
+
+            <!-- Swatch Grid Container -->
+            <div class="swatch-grid" id="swatchGrid" role="radiogroup" aria-label="Color Palette Swatches">
+              <!-- Swatches dynamically injected by app.js -->
+            </div>
+
+            <!-- Custom User Saved Swatches -->
+            <div class="custom-swatches-section">
+              <div class="custom-swatches-header">
+                <span class="custom-swatches-label">Custom Swatches</span>
+                <button type="button" class="btn-clear-swatches" id="btnClearCustomSwatches" title="Clear Custom Swatches">Clear</button>
+              </div>
+              <div class="swatch-grid custom-swatch-grid" id="customSwatchGrid">
+                <!-- Custom user swatches appended here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Canvas & Tool Settings -->
+        <div class="drawer-section" id="drawerSectionSettings">
+          <!-- Canvas Dimensions & Background Settings -->
+          <div class="palette-card">
+            <div class="card-header">
+              <span class="card-title">Canvas Settings</span>
+            </div>
+
+            <div class="settings-control-group">
+              <label class="settings-label">Grid Size</label>
+              <div class="grid-size-buttons" role="radiogroup" aria-label="Grid Dimensions">
+                <button type="button" class="btn-grid-size" data-size="16" role="radio" aria-checked="false">16×16</button>
+                <button type="button" class="btn-grid-size" data-size="24" role="radio" aria-checked="false">24×24</button>
+                <button type="button" class="btn-grid-size active" data-size="32" role="radio" aria-checked="true">32×32</button>
+                <button type="button" class="btn-grid-size" data-size="48" role="radio" aria-checked="false">48×48</button>
+                <button type="button" class="btn-grid-size" data-size="64" role="radio" aria-checked="false">64×64</button>
+              </div>
+            </div>
+
+            <div class="settings-control-group">
+              <label class="settings-label">Background</label>
+              <div class="bg-style-buttons">
+                <button type="button" class="btn-bg-style active" data-bg="transparent" id="bgTransparentBtn">
+                  <span class="bg-preview-chip chip-transparent"></span>
+                  <span>Alpha</span>
+                </button>
+                <button type="button" class="btn-bg-style" data-bg="#ffffff" id="bgWhiteBtn">
+                  <span class="bg-preview-chip chip-white"></span>
+                  <span>White</span>
+                </button>
+                <button type="button" class="btn-bg-style" data-bg="#18191e" id="bgDarkBtn">
+                  <span class="bg-preview-chip chip-dark"></span>
+                  <span>Dark</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile/Tablet Tool Modifiers Block -->
+          <div class="palette-card mobile-tablet-only">
+            <div class="card-header">
+              <span class="card-title">Stroke & Symmetry</span>
+            </div>
+
+            <div class="settings-control-group" id="sheetBrushGroup">
+              <label class="settings-label">Stroke Size (Pen & Eraser)</label>
+              <div class="grid-size-buttons" role="radiogroup" aria-label="Mobile Stroke Size">
+                <button type="button" class="btn-grid-size size-sheet-btn active" data-size="1" role="radio" aria-checked="true">1px</button>
+                <button type="button" class="btn-grid-size size-sheet-btn" data-size="2" role="radio" aria-checked="false">2px</button>
+                <button type="button" class="btn-grid-size size-sheet-btn" data-size="3" role="radio" aria-checked="false">3px</button>
+              </div>
+            </div>
+
+            <div class="settings-control-group">
+              <label class="settings-label">Symmetry Axes</label>
+              <div class="symmetry-grid">
+                <button type="button" class="btn-toggle" id="btnSheetMirrorX" title="Horizontal Mirror Symmetry" aria-pressed="false">
+                  <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                    <path d="M10 2a1 1 0 011 1v14a1 1 0 11-2 0V3a1 1 0 011-1zM4 6a1 1 0 011 1v6a1 1 0 11-2 0V7a1 1 0 011-1zM16 6a1 1 0 011 1v6a1 1 0 11-2 0V7a1 1 0 011-1z"/>
+                  </svg>
+                  <span>Mirror X</span>
+                </button>
+                <button type="button" class="btn-toggle" id="btnSheetMirrorY" title="Vertical Mirror Symmetry" aria-pressed="false">
+                  <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+                    <path d="M2 10a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM6 4a1 1 0 011 1h6a1 1 0 110 2H7a1 1 0 01-1-1zM6 14a1 1 0 011 1h6a1 1 0 110 2H7a1 1 0 01-1-1z"/>
+                  </svg>
+                  <span>Mirror Y</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile/Tablet View & Action Controls Block -->
+          <div class="palette-card mobile-tablet-only">
+            <div class="card-header">
+              <span class="card-title">View & Actions</span>
+            </div>
+
+            <div class="settings-control-group">
+              <label class="settings-label">Grid & Viewport</label>
+              <div class="view-actions-grid">
+                <button type="button" class="btn-subtle" id="btnSheetToggleGrid">
+                  <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                  <span>Grid Lines</span>
+                </button>
+                <button type="button" class="btn-subtle" id="btnSheetZoomOut" title="Zoom Out">
+                  <span>Zoom -</span>
+                </button>
+                <button type="button" class="btn-subtle" id="btnSheetZoomIn" title="Zoom In">
+                  <span>Zoom +</span>
+                </button>
+                <button type="button" class="btn-subtle" id="btnSheetZoomReset" title="Reset Zoom">
+                  <span>Reset 100%</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-control-group">
+              <label class="settings-label">Canvas Actions</label>
+              <div class="document-actions-grid">
+                <button type="button" class="btn-danger" id="btnSheetClearCanvas">
+                  <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Clear Canvas</span>
+                </button>
+
+                <label class="btn-subtle file-upload-label" title="Import Image as Pixel Art">
+                  <input type="file" id="sheetImageInput" accept="image/*" class="visually-hidden">
+                  <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Import Image</span>
+                </label>
+
+                <button type="button" class="btn-subtle" id="btnSheetShortcuts">
+                  <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                  </svg>
+                  <span>Shortcuts</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- Fixed Mobile Bottom Toolbar (<= 599px) -->
+    <nav class="mobile-bottom-bar mobile-only" id="mobileBottomBar" role="toolbar" aria-label="Mobile Drawing Tools">
+      <button type="button" class="mobile-tool-btn active" data-tool="pen" id="mToolPen" title="Pen" aria-label="Pen Tool">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+        <span>Pen</span>
+      </button>
+
+      <button type="button" class="mobile-tool-btn" data-tool="eraser" id="mToolEraser" title="Eraser" aria-label="Eraser Tool">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+        <span>Eraser</span>
+      </button>
+
+      <button type="button" class="mobile-tool-btn" data-tool="bucket" id="mToolBucket" title="Paint Bucket" aria-label="Paint Bucket">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.732V5a2 2 0 012-2h4a2 2 0 012 2v7.268A4 4 0 0116 19a4 4 0 01-6-4.732z" clip-rule="evenodd"/>
+        </svg>
+        <span>Fill</span>
+      </button>
+
+      <button type="button" class="mobile-tool-btn" data-tool="dropper" id="mToolDropper" title="Eyedropper" aria-label="Eyedropper">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7 2a1 1 0 00-.707.293l-4 4a1 1 0 000 1.414l1.293 1.293L2.293 10.293a1 1 0 000 1.414l7 7a1 1 0 001.414 0l1.293-1.293 1.293 1.293a1 1 0 001.414 0l4-4a1 1 0 000-1.414l-4-4a1 1 0 00-.707-.293H13V3a1 1 0 00-1-1H7zm5.414 9l-4.707-4.707 1.293-1.293 4.707 4.707-1.293 1.293z" clip-rule="evenodd"/>
+        </svg>
+        <span>Pick</span>
+      </button>
+
+      <button type="button" class="mobile-tool-btn" data-tool="line" id="mToolLine" title="Line Tool" aria-label="Line Tool">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 17a1 1 0 010-1.414l12-12a1 1 0 111.414 1.414l-12 12A1 1 0 013 17z" clip-rule="evenodd"/>
+        </svg>
+        <span>Line</span>
+      </button>
+
+      <button type="button" class="mobile-tool-btn" data-tool="rect" id="mToolRect" title="Rectangle Tool" aria-label="Rectangle Tool">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v10h10V5H5z" clip-rule="evenodd"/>
+        </svg>
+        <span>Rect</span>
+      </button>
+
+      <!-- Color Swatch Trigger -->
+      <button type="button" class="mobile-tool-btn mobile-color-btn" id="mBtnColor" title="Color Palette" aria-label="Open Color Palette">
+        <span class="mobile-swatch-circle" id="mColorCircle" style="background-color: #f05d38;"></span>
+        <span>Color</span>
+      </button>
+
+      <!-- Settings Trigger -->
+      <button type="button" class="mobile-tool-btn" id="mBtnSettings" title="Settings" aria-label="Open Settings">
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+          <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+        </svg>
+        <span>Setup</span>
+      </button>
+    </nav>
+
+    <!-- Modals & Overlays -->
+    
+    <!-- Export Dialog -->
+    <div class="modal-backdrop" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title" id="exportModalTitle">Export Pixel Art</h2>
+          <button type="button" class="modal-close-btn" id="btnExportClose" aria-label="Close dialog">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Live Scaled Preview -->
+          <div class="export-preview-container">
+            <div class="export-preview-box">
+              <img id="exportPreviewImg" alt="Pixel Art Preview" class="export-preview-img">
+            </div>
+            <div class="export-meta font-mono" id="exportMetaDimensions">Output: 512 × 512 px</div>
+          </div>
+
+          <!-- Export Configuration Options -->
+          <div class="export-options">
+            <div class="option-row">
+              <label class="option-label" for="exportScaleSelect">Resolution Scale</label>
+              <select id="exportScaleSelect" class="option-select">
+                <option value="1">1× (Original Sprite)</option>
+                <option value="4">4× (Compact)</option>
+                <option value="8">8× (Medium)</option>
+                <option value="16" selected>16× (Standard 512px)</option>
+                <option value="32">32× (Ultra HD 1024px)</option>
+              </select>
+            </div>
+
+            <div class="option-row">
+              <label class="option-label" for="exportFilenameInput">File Name</label>
+              <div class="filename-input-group">
+                <input type="text" id="exportFilenameInput" value="pixel-artwork" class="filename-input font-mono">
+                <span class="file-ext">.png</span>
+              </div>
+            </div>
+
+            <div class="option-row checkbox-row">
+              <label class="checkbox-container">
+                <input type="checkbox" id="exportTransparentCheck" checked>
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-label">Preserve transparent background</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-subtle" id="btnExportCancel">Cancel</button>
+          <button type="button" class="btn-primary" id="btnExportConfirm">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+            <span>Download PNG</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear / Resize Confirmation Dialog -->
+    <div class="modal-backdrop" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" hidden>
+      <div class="modal-card modal-card-sm">
+        <div class="modal-header">
+          <h2 class="modal-title" id="confirmModalTitle">Clear Canvas?</h2>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text" id="confirmModalDescription">This will clear the current artwork. You can undo this action immediately after with Ctrl+Z.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-subtle" id="btnConfirmCancel">Keep Artwork</button>
+          <button type="button" class="btn-danger" id="btnConfirmProceed">Proceed</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Dialog -->
+    <div class="modal-backdrop" id="shortcutsModal" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title" id="shortcutsModalTitle">Keyboard Shortcuts</h2>
+          <button type="button" class="modal-close-btn" id="btnShortcutsClose" aria-label="Close dialog">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="shortcuts-grid">
+            <div class="shortcut-row"><span class="shortcut-desc">Pencil / Pen Tool</span><kbd>B</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Eraser Tool</span><kbd>E</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Paint Bucket Tool</span><kbd>G</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Eyedropper Tool</span><kbd>I</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Line Tool</span><kbd>L</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Rectangle Tool</span><kbd>R</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Toggle Grid Lines</span><kbd>H</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Swap Colors</span><kbd>X</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Undo</span><kbd>Ctrl</kbd> + <kbd>Z</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Redo</span><kbd>Ctrl</kbd> + <kbd>Y</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Zoom In / Zoom Out</span><kbd>+</kbd> / <kbd>-</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Reset Zoom</span><kbd>0</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Clear Canvas</span><kbd>C</kbd></div>
+            <div class="shortcut-row"><span class="shortcut-desc">Brush Size</span><kbd>1</kbd> - <kbd>3</kbd></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-primary" id="btnShortcutsOk">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

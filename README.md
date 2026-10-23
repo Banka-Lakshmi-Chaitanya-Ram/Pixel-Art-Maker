@@ -1,5 +1,7 @@
 # BitStudio — Pixel Art Editor
 
+**Live Demo**: [https://pixel-art-maker-amber.vercel.app](https://pixel-art-maker-amber.vercel.app)
+
 A crisp, responsive, browser-based pixel art editor built with vanilla HTML5, CSS3, and modern JavaScript. Inspired by retro sprite tools and modern creative workstations, BitStudio provides an intentional, clutter-free creative environment without templates, generic marketing filler, or bloated dependencies.
 
 ![BitStudio Demo](screenshot.png) *(generated preview)*
